@@ -10,7 +10,10 @@ config_version=4
 
 [application]
 
+config/name="2048"
 run/main_scene="res://World.tscn"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="bendn-2048"
 
 [autoload]
 
