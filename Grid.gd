@@ -31,19 +31,11 @@ func init_grid():
 			grid_row.append(block)
 		grid_cells.append(grid_row)
 
-
 func update_grid_cells():
 	for i in range(Constants.GRID_LEN):
 		for j in range(Constants.GRID_LEN):
 			var new_number = matrix[i][j]
-			if new_number == 0:
-				grid_cells[i][j].configure("", Constants.BACKGROUND_COLOR_CELL_EMPTY)
-			else:
-				grid_cells[i][j].configure(
-					str(new_number),
-					Constants.BACKGROUND_COLOR_ARRAY[Constants.cells[new_number]],
-					Constants.CELL_COLOR_ARRAY[Constants.cells[new_number]]
-				)
+			grid_cells[i][j].update_colors(new_number)
 
 
 func _input(event):
