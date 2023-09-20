@@ -6,16 +6,16 @@ var first_touch_position := Vector2.ZERO
 var touch_release_position := Vector2.ZERO
 var swiping := false
 
-export var swipe_limit : float
-export var touch_y_limit : int
+@export var swipe_limit : float
+@export var touch_y_limit : int
 
 var swipe_start
 
 var quick_trigger = 150
 
 func _ready():
-	set_process(not OS.has_touchscreen_ui_hint())
-	set_process_input(OS.has_touchscreen_ui_hint())
+	set_process(not DisplayServer.is_touchscreen_available())
+	set_process_input(DisplayServer.is_touchscreen_available())
 
 func _input(event):
 	if event is InputEventScreenTouch:
@@ -41,14 +41,14 @@ func _process(_delta):
 		touch_release_position = get_global_mouse_position()
 		calculate_direction()
 		swiping = false
-		
+
 func calculate_direction():
 	var swipe_vector = touch_release_position - first_touch_position
 	if swipe_vector.length() > swipe_limit:
-		var temp = rad2deg(swipe_vector.angle()) + 180 # right = 0
+		var temp = rad_to_deg(swipe_vector.angle()) + 180 # right = 0
 		first_touch_position = Vector2.ZERO
 		touch_release_position = Vector2.ZERO
-	
+
 		if temp > 45 and temp <= 135:
 			emit_signal("swiped", Vector2.UP)
 		elif temp > 135 and temp <= 225:
@@ -57,8 +57,8 @@ func calculate_direction():
 			emit_signal("swiped", Vector2.DOWN)
 		else:
 			emit_signal("swiped", Vector2.LEFT)
-	
-	
+
+
 func calculate_swipe(dist):
 	if dist.x > .5:
 		emit_signal("swiped", Vector2.RIGHT)

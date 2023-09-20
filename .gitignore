@@ -1,2 +1,3 @@
 *.log
 .import/
+.godot/

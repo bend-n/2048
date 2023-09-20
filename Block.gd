@@ -3,15 +3,15 @@ var bg
 var label: Label
 
 
-func configure(text: String, background: Color, text_color: Color = Color.white):
+func configure(text: String, background: Color, text_color: Color = Color.WHITE):
 	if !bg:
 		bg = $ColorRect
 	if !label:
 		label = $Label
 	bg.color = background
 	label.text = text
-	if text_color != Color.white:
-		label.add_color_override("font_color", text_color)
+	if text_color != Color.WHITE:
+		label.add_theme_color_override("font_color", text_color)
 
 func update_colors(new_number):
 	if new_number == 0:

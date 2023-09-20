@@ -1,15 +1,15 @@
 extends Node
 
-export(Color) var LOSE_COLOR_TEXT
+@export var LOSE_COLOR_TEXT: Color
 const SIZE = 400
 const GRID_LEN = 4
 const BLOCK_SIZE = 32
 
-export(Color) var BACKGROUND_COLOR_GAME = "#92877d"
-export(Color) var BACKGROUND_COLOR_CELL_EMPTY = "#9e948a"
+@export var BACKGROUND_COLOR_GAME: Color = "#92877d"
+@export var BACKGROUND_COLOR_CELL_EMPTY: Color = "#9e948a"
 
-export(Array, Color) var BACKGROUND_COLOR_ARRAY: Array  # go up to 65536
-export(Array, Color) var CELL_COLOR_ARRAY: Array  # go up to 65536
+@export var BACKGROUND_COLOR_ARRAY: Array  # go up to 65536 # (Array, Color)
+@export var CELL_COLOR_ARRAY: Array  # go up to 65536 # (Array, Color)
 
 const cells = {
 	2: 1,

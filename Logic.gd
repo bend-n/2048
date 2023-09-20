@@ -2,12 +2,26 @@
 extends Node
 
 var done
+var moves: Array
+var materialized_a: Vector2
+var materialized_b: Vector2
 
+class Merge:
+	var at: Vector2
+	var with: Vector2
 
-func new_game(n):
-	var matrix = []
+class Move:
+	var from: Vector2
+	var to: Vector2
+
+	func _init(a: Vector2, b: Vector2):
+		self.from = a
+		self.to = b
+
+func new_game(n: int) -> Array[PackedInt32Array]:
+	var matrix: Array[PackedInt32Array] = []
 	for i in range(n):
-		matrix.append([])
+		matrix.append(PackedInt32Array())
 		for _j in range(n):
 			matrix[i].append(0)
 	matrix = add_two(matrix)
@@ -15,17 +29,19 @@ func new_game(n):
 	return matrix
 
 
-func add_two(mat):
-	var a = round(rand_range(0, mat.size() - 1))
-	var b = round(rand_range(0, mat.size() - 1))
+func add_two(mat: Array[PackedInt32Array]):
+	var a = roundi(randf_range(0, mat.size() - 1))
+	var b = roundi(randf_range(0, mat.size() - 1))
 	while mat[a][b] != 0:
-		a = round(rand_range(0, mat.size() - 1))
-		b = round(rand_range(0, mat.size() - 1))
-	mat[a][b] = 4 if rand_range(0, 1) > .9 else 2
+		a = roundi(randf_range(0, mat.size() - 1))
+		b = roundi(randf_range(0, mat.size() - 1))
+	mat[a][b] = 4 if randf_range(0, 1) > .9 else 2
+	materialized_a = Vector2(a / mat.size(), a % mat.size())
+	materialized_b = Vector2(b / mat.size(), b % mat.size())
 	return mat
 
 
-func game_state(mat):
+func game_state(mat: Array[PackedInt32Array]):
 	# check for win cell
 	var zero = false
 	for i in range(mat.size()):
@@ -53,28 +69,28 @@ func game_state(mat):
 	return "lose"
 
 
-func reverse(mat):
-	var new = []
-	for i in range(mat.size()):
-		new.append([])
-		for j in range(mat[0].size()):
-			new[i].append(mat[i][mat[0].size() - j - 1])
-	return new
+func reverse(mat: Array[PackedInt32Array]):
+	for i in range(Constants.GRID_LEN):
+		for j in range(Constants.GRID_LEN/2):
+			var tmp = mat[i][j]
+			mat[i][j] = mat[i][Constants.GRID_LEN - j - 1]
+			mat[i][Constants.GRID_LEN - j - 1] = tmp
+			moves.append(Move.new(Vector2(i,j), Vector2(j, Constants.GRID_LEN - j - i)))
+	return mat
 
-
-func transpose(mat):
-	var new = []
-	for i in range(mat[0].size()):
-		new.append([])
-		for j in range(mat.size()):
-			new[i].append(mat[j][i])
-	return new
-
+func transpose(mat: Array[PackedInt32Array]):
+	for i in range(Constants.GRID_LEN):
+		for j in range(i + 1, Constants.GRID_LEN):
+			var tmp = mat[i][j]
+			mat[i][j] = mat[j][i]
+			mat[j][i] = tmp
+			moves.append(Move.new(Vector2(j,i), Vector2(i, j)))
+	return mat
 
 func cover_up(mat, no_done = false):
-	var new = []
+	var new: Array[PackedInt32Array] = []
 	for _j in range(Constants.GRID_LEN):
-		var partial_new = []
+		var partial_new = PackedInt32Array()
 		for _i in range(Constants.GRID_LEN):
 			partial_new.append(0)
 		new.append(partial_new)
@@ -85,59 +101,67 @@ func cover_up(mat, no_done = false):
 		for j in range(Constants.GRID_LEN):
 			if mat[i][j] != 0:
 				new[i][count] = mat[i][j]
+				moves.append(Move.new(Vector2(i, j), Vector2(i, count)))
 				if !no_done and j != count:
 					done = true
 				count += 1
 	return new
 
 
-func merge(mat):
+func merge(mat: Array[PackedInt32Array]):
 	for i in range(Constants.GRID_LEN):
 		for j in range(Constants.GRID_LEN - 1):
 			if mat[i][j] == mat[i][j + 1] and mat[i][j] != 0:
 				mat[i][j] *= 2
 				mat[i][j + 1] = 0
+				var merge = Merge.new()
+				merge.at = Vector2(i, j)
+				merge.with = Vector2(i, j + 1)
+				moves.append(merge)
 				done = true
-	return mat
 
 
-func left(game):
+func left(game: Array[PackedInt32Array]):
 	print("<")
+	moves.clear()
 	# return matrix after shifting left
-	game = transpose(game)
+	transpose(game)
 	game = cover_up(game)
-	game = merge(game)
+	merge(game)
 	game = cover_up(game, true)
-	game = transpose(game)
+	transpose(game)
 	return [game, done]
 
 
-func right(game):
+func right(game: Array[PackedInt32Array]):
 	print(">")
+	moves.clear()
 	# return matrix after shifting right
-	game = reverse(transpose(game))
+	game = reverse(transpose(game.duplicate()))
 	game = cover_up(game)
-	game = merge(game)
+	merge(game)
 	game = cover_up(game, true)
-	game = transpose(reverse(game))
+	game = transpose(reverse(game.duplicate()))
 	return [game, done]
 
 
-func up(game):
+func up(game: Array[PackedInt32Array]):
 	print("^")
+	moves.clear()
 	# return matrix after shifting up
 	game = cover_up(game)
-	game = merge(game)
+	merge(game)
 	game = cover_up(game, true)
 	return [game, done]
 
 
-func down(game):
+func down(game: Array[PackedInt32Array]):
 	print("v")
+	moves.clear()
 	# return matrix after shifting down
-	game = reverse(game)
+	reverse(game)
 	game = cover_up(game)
-	game = merge(game)
+	merge(game)
 	game = cover_up(game, true)
-	game = reverse(game)
+	reverse(game)
 	return [game, done]

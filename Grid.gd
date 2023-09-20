@@ -23,7 +23,7 @@ func init_grid():
 	for i in range(Constants.GRID_LEN):
 		var grid_row = []
 		for j in range(Constants.GRID_LEN):
-			var block = Block.instance()
+			var block = Block.instantiate()
 			add_child(block)
 			block.global_position += Vector2(
 				i * Constants.BLOCK_SIZE + 10, j * Constants.BLOCK_SIZE + 10
